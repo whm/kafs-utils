@@ -1,0 +1,48 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# -*- python-mode -*-
+
+"""AFS Toolkit Volume management command set
+"""
+
+__copyright__ = """
+Copyright (C) 2014 Red Hat, Inc. All Rights Reserved.
+Written by David Howells (dhowells@redhat.com)
+
+Copyright (C) 2005, Catalin Marinas <catalin.marinas@gmail.com>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public Licence version 2 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public Licence for more details.
+
+You should have received a copy of the GNU General Public Licence
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+"""
+
+import sys, os
+
+# Try to detect where it is run from and set prefix and the search path.
+# It is assumed that the user installed Afs using the --prefix= option
+prefix, bin = os.path.split(sys.path[0])
+
+if bin == 'bin' and prefix != sys.prefix:
+    sys.prefix = prefix
+    sys.exec_prefix = prefix
+
+    major, minor = sys.version_info[0:2]
+    local_path = [os.path.join(prefix, 'lib', 'python'),
+                  os.path.join(prefix, 'lib', 'python%s.%s' % (major, minor)),
+                  os.path.join(prefix, 'lib', 'python%s.%s' % (major, minor),
+                               'site-packages')]
+    sys.path = local_path + sys.path
+
+from afs.main import main
+
+if __name__ == '__main__':
+    main()

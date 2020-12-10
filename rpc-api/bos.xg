@@ -1,0 +1,238 @@
+/* -*- c -*-
+ *
+ * Interface to the BOS server.
+ *
+ *
+ * Copyright (c) 1999 - 2002 Kungliga Tekniska Högskolan
+ * (Royal Institute of Technology, Stockholm, Sweden).
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the Institute nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+package BOZO_
+
+const BOSSERVICE_PORT		= 7007;
+const BOSSERVICE_ID		= 1;
+
+/* Error codes */
+const BZNOTACTIVE		= 39424;
+const BZNOENT			= 39425;
+const BZBUSY			= 39426;
+const BZEXISTS			= 39427;
+const BZNOCREATE		= 39428;
+const BZDOM			= 39429;
+const BZACCESS			= 39430;
+const BZSYNTAX			= 39431;
+const BZIO			= 39432;
+const BZNET			= 39433;
+const BZBADTYPE			= 39434;
+const BZKVNOINUSE		= 39435;
+
+const BOZO_BSSIZE		= 256;
+
+const BSTAT_SHUTDOWN		= 0;
+const BSTAT_NORMAL		= 1;
+const BSTAT_SHUTTINGDOWN	= 2;
+const BSTAT_STARTINGUP		= 3;
+
+const BOZO_PRUNEOLD		= 1;
+const BOZO_PRUNEBAK		= 2;
+const BOZO_PRUNECORE		= 4;
+
+const BPROC_STARTED		= 1;
+const BPROC_EXITED		= 2;
+
+const BOZO_HASCORE		= 1;
+const BOZO_ERRORSTOP		= 2;
+const BOZO_BADDIRACCESS		= 4;
+
+const BNODE_NEEDTIMEOUT		= 0x01;
+const BNODE_ACTIVE		= 0x02;
+const BNODE_WAIT		= 0x04;
+const BNODE_DELETE		= 0x08;
+const BNODE_ERRORSTOP		= 0x10;
+
+const KTIME_HOUR		= 0x01;
+const KTIME_MIN			= 0x02;
+const KTIME_SEC			= 0x04; /* XXX check me */
+const KTIME_DAY			= 0x08;
+const KTIME_TIME		= 0x07;
+const KTIME_NEVER		= 0x10;
+const KTIME_NOW			= 0x20;
+
+/* GetRestartTime */
+
+const BOZO_RESTARTTIME_GENERAL	= 0x1;	/* general reboot time */
+const BOZO_RESTARTTIME_NEWBIN	= 0x2;	/* new binary */
+
+struct bozo_status {
+	uint32_t goal;
+	uint32_t fileGoal;
+	uint32_t porcStartTime;
+	uint32_t procStarts;
+	uint32_t lastAnyExit;
+	uint32_t lastErrorExit;
+	uint32_t errorCode;
+	uint32_t errorSignal;
+	uint32_t flags;
+	uint32_t spare[8];
+};
+
+struct bozo_netKTime {
+	uint32_t mask;
+	uint16_t hour;
+	uint16_t min;
+	uint16_t sec;
+	uint16_t day;
+};
+
+struct bozo_key {
+	uint8_t data[8];
+};
+
+struct bozo_keyInfo {
+	uint32_t mod_sec;
+	uint32_t mod_usec;
+	uint32_t keyCheckSum;
+	uint32_t spare2;
+};
+
+
+CreateBnode (IN string type<BOZO_BSSIZE>,
+	     IN string instance<BOZO_BSSIZE>,
+	     IN string p1<BOZO_BSSIZE>,
+	     IN string p2<BOZO_BSSIZE>,
+	     IN string p3<BOZO_BSSIZE>,
+	     IN string p4<BOZO_BSSIZE>,
+	     IN string p5<BOZO_BSSIZE>,
+	     IN string p6<BOZO_BSSIZE>) = 80;
+
+DeleteBnode (IN string instance<BOZO_BSSIZE>) = 81;
+
+SetStatus (IN string instance<BOZO_BSSIZE>,
+	   IN uint32_t status) = 82;
+
+
+GetStatus (IN string instance<BOZO_BSSIZE>,
+	   OUT uint32_t *inStat,
+	   OUT string statdescr<BOZO_BSSIZE>) = 83;
+
+
+EnumerateInstance (IN uint32_t instance,
+		   OUT string iname<BOZO_BSSIZE>) = 84;
+
+GetInstanceInfo (IN string instance<BOZO_BSSIZE>,
+		 OUT string type<BOZO_BSSIZE>,
+		 OUT bozo_status *status) = 85;
+
+GetInstanceParm (IN string instance<BOZO_BSSIZE>,
+		 IN uint32_t num,
+		 OUT string parm<BOZO_BSSIZE>) = 86;
+
+AddSUser (IN string name<BOZO_BSSIZE>) = 87;
+
+DeleteSUser (IN string name<BOZO_BSSIZE>) = 88;
+
+ListSUsers (IN uint32_t an,
+	    OUT string name<BOZO_BSSIZE>) = 89;
+
+ListKeys (IN uint32_t an,
+	  OUT uint32_t *kvno,
+	  OUT bozo_key *key,
+	  OUT bozo_keyInfo *keinfo) = 90;
+
+AddKey (IN uint32_t an,
+	IN bozo_key *key) = 91;
+
+DeleteKey (IN uint32_t an) = 92;
+
+SetCellName (IN string name<BOZO_BSSIZE>) = 93;
+
+GetCellName (OUT string name<BOZO_BSSIZE>) = 94;
+
+GetCellHost (IN uint32_t awhich,
+	     OUT string name<BOZO_BSSIZE>) = 95;
+
+AddCellHost (IN string name<BOZO_BSSIZE>) = 96;
+
+DeleteCellHost (IN string name<BOZO_BSSIZE>) = 97;
+
+SetTStatus (IN string instance<BOZO_BSSIZE>,
+	    IN uint32_t status) = 98;
+
+ShutdownAll () = 99;
+
+RestartAll () = 100;
+
+StartupAll () = 101;
+
+SetNoAuthFlag (IN uint32_t flag) = 102;
+
+ReBozo () = 103;
+
+Restart (IN string instance<BOZO_BSSIZE>) = 104;
+
+Install (IN string path<BOZO_BSSIZE>,
+	 IN uint32_t size,
+	 IN uint32_t flags,
+	 IN uint32_t date) split = 105;
+
+UnInstall (IN string path<BOZO_BSSIZE>) = 106;
+
+GetDates (IN string path<BOZO_BSSIZE>,
+	  OUT uint32_t *newtime,
+	  OUT uint32_t *baktime,
+	  OUT uint32_t *oldtime) = 107;
+
+
+Exec (IN string cmd<BOZO_BSSIZE>) = 108;
+
+Prune (IN uint32_t flags) = 109;
+
+SetRestartTime (IN uint32_t type,
+		IN bozo_netKTime *restartTime) = 110;
+
+
+
+GetRestartTime (IN uint32_t type,
+		OUT bozo_netKTime *restartTime) = 111;
+
+GetLog(IN string name<BOZO_BSSIZE>) split = 112;
+
+WaitAll () =  113;
+
+GetInstanceStrings (IN string instance<BOZO_BSSIZE>,
+		    OUT string errorname<BOZO_BSSIZE>,
+		    OUT string spare1<BOZO_BSSIZE>,
+		    OUT string spare2<BOZO_BSSIZE>,
+		    OUT string spare3<BOZO_BSSIZE>) = 114;
+
+GetRestricted (OUT uint32_t *isrestricted) = 115;
+
+SetRestricted (IN uint32_t isrestricted) = 116;

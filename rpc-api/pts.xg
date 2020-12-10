@@ -1,0 +1,303 @@
+/* -*- c -*-
+ *
+ * Interface to the Protection Server.
+ *
+ *
+ * Copyright (c) 1998 - 2002 Kungliga Tekniska Högskolan
+ * (Royal Institute of Technology, Stockholm, Sweden).
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the Institute nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+package PR_
+
+const PR_PORT		= 7002;	/* Protection service port */
+const PR_SERVICE	= 73;	/* RxRPC service ID for the Protection service */
+
+/* Opcodes */
+const PRINEWUSER	= 500;
+const PRWHEREISIT	= 501;
+const PRDUMPENTRY	= 502;
+const PRADDTOGROUP	= 503;
+const PRNAMETOUID	= 504;
+const PRIDTONAME	= 505;
+const PRDELETE		= 506;
+const PRREMOVEFROMGROUP	= 507;
+const PRGETCPS		= 508;
+const PRNEWENTRY	= 509;
+const PRLISTMAX		= 510;
+const PRSETMAX		= 511;
+const PRLISTENTRY	= 512;
+const PRCHANGEENTRY	= 513;
+const PRLISTELEMENTS	= 514;
+const PROSAMEMBEROF	= 515;
+const PRSETFIELDSENTRY	= 516;
+const PRLISTOWNED	= 517;
+const PRGETCPS2		= 518;
+const PRGETHOSTCPS	= 519;
+const PRLISTENTRIES	= 521;
+
+/* Constants */
+const PR_MAXNAMELEN = 64;
+const PR_MAXGROUPS = 5000;
+const PR_MAXLIST = 5000;
+const PRSIZE = 10;
+const COSIZE = 39;
+const ENTRYSIZE = 192;
+
+const PRDBVERSION = 0;
+
+/* Bits for PR_SetFieldsEntry() */
+const PR_SF_NGROUPS	= 0x80000000;
+const PR_SF_NUSERS	= 0x40000000;
+const PR_SF_ALLBITS	= 0xff;
+
+/* Reserved IDs */
+const PR_SYSADMINID	= -204;
+const PR_ANYUSERID	= -101;
+const PR_AUTHUSERID	= -102;
+const PR_ANONYMOUSID	= 32766;
+const PR_BADID		= 0x80000000;
+
+/* Bits for struct prentry flags */
+const PRTYPE	= 0x3f;
+const PRFREE	= 1;
+const PRGRP	= 2;
+const PRCONT	= 4;
+const PRCELL	= 8;
+const PRFOREIGN	= 16;
+const PRINST	= 32;
+const PRUSER	= 0;
+
+const PRACCESS	= 0x40;
+const PRQUOTA	= 0x80;
+
+/* Privacy Bits */
+
+const PRP_REMOVE_MEM	= 0x010000;
+const PRP_ADD_MEM	= 0x020000;
+const PRP_ADD_ANY	= 0x040000;
+const PRP_MEMBER_MEM	= 0x080000;
+const PRP_MEMBER_ANY	= 0x100000;
+const PRP_OWNED_ANY	= 0x200000;
+const PRP_STATUS_MEM	= 0x400000;
+const PRP_STATUS_ANY	= 0x800000;
+
+/* Misc */
+const PRSUCCESS = 0;
+const PR_REMEMBER_TIMES = 1;
+
+struct prentry {
+	uint32_t flags;
+	int32_t  id;
+	uint32_t cellid;
+	uint32_t next;
+	uint32_t reserved[5];
+	int32_t  entries[PRSIZE];
+	uint32_t nextID;
+	uint32_t nextName;
+	int32_t  owner;
+	int32_t  creator;
+	uint32_t ngroups;
+	uint32_t nusers;
+	uint32_t count;
+	uint32_t instance;
+	uint32_t owned;
+	uint32_t nextOwned;
+	uint32_t parent;
+	uint32_t sibling;
+	uint32_t child;
+	char name[PR_MAXNAMELEN];
+};
+
+struct prdebugentry {
+	uint32_t flags;
+	int32_t  id;
+	uint32_t cellid;
+	uint32_t next;
+	uint32_t reserved[5];
+	int32_t  entries[PRSIZE];
+	uint32_t nextID;
+	uint32_t nextname;
+	int32_t  owner;
+	int32_t  creator;
+	uint32_t ngroups;
+	uint32_t nusers;
+	uint32_t count;
+	uint32_t instance;
+	uint32_t owned;
+	uint32_t nextOwned;
+	uint32_t parent;
+	uint32_t sibling;
+	uint32_t child;
+	char name[PR_MAXNAMELEN];
+};
+
+struct prcheckentry {
+	uint32_t flags;
+	int32_t  id;
+	int32_t  owner;
+	int32_t  creator;
+	uint32_t ngroups;
+	uint32_t nusers;
+	uint32_t count;
+	uint32_t reserved[5];
+	char name[PR_MAXNAMELEN];
+};
+
+
+struct prname {
+	char prname[PR_MAXNAMELEN];
+};
+
+typedef prname namelist<PR_MAXLIST>;
+
+typedef int32_t idlist<PR_MAXLIST>;
+
+typedef int32_t prlist<PR_MAXGROUPS>;
+
+
+/* Error codes */
+const PREXIST		= 267264;
+const PRIDEXIST		= 267265;
+const PRNOIDS		= 267266;
+const PRDBFAIL		= 267267;
+const PRNOENT		= 267268;
+const PRPERM		= 267269;
+const PRNOTGROUP	= 267270;
+const PRNOTUSER		= 267271;
+const PRBADNAM		= 267272;
+const PRBADARG		= 267273;
+const PRNOMORE		= 267274;
+const PRDBBAD		= 267275;
+const PRGROUPEMPTY	= 267276;
+const PRINCONSISTENT	= 267277;
+const PRBADDR		= 267278;
+const PRTOOMANY		= 267279;
+
+
+NameToID(IN namelist *nlist,
+	 OUT idlist *ilist) = 504;
+
+IDToName(IN idlist *ilist,
+	 OUT namelist *nlist) = 505;
+
+NewEntry(IN string name<PR_MAXNAMELEN>,
+	 IN uint32_t flag,
+	 IN int32_t oid,
+	 OUT int32_t *id) = 509;
+
+INewEntry(IN string name<PR_MAXNAMELEN>,
+	  IN int32_t id,
+	  IN int32_t oid) = 500;
+
+ListEntry(IN int32_t id,
+	  OUT prcheckentry *entry) = 512;
+
+DumpEntry(IN uint32_t pos,
+	  OUT prdebugentry *entry) = 502;
+
+ChangeEntry(IN int32_t id,
+	    IN string name<PR_MAXNAMELEN>,
+	    IN int32_t oid,
+	    IN int32_t newid) = 513;
+
+SetFieldsEntry(IN int32_t id,
+	       IN uint32_t mask,
+	       IN uint32_t flags,
+	       IN uint32_t ngroups,
+	       IN uint32_t nusers,
+	       IN uint32_t spare1,
+	       IN uint32_t spare2) = 516;
+
+/*
+ * Group/entries that can't be deleted: SYSADMINID, ANYUSERID,
+ * AUTHUSERID, ANONYMOUSID. Error returned is PRPERM.
+ *
+ * Rights: member of SYSADMINID, or owner to entry, or member of the
+ * owner to `id'.
+ *
+ * Sucess: PRSUCCESS.
+ */
+
+Delete(IN int32_t id) = 506;
+
+WhereIsIt(IN int32_t id,
+	  OUT uint32_t *ps) = 501;
+
+AddToGroup(IN int32_t uid,
+	   IN int32_t gid) = 503;
+
+RemoveFromGroup(IN int32_t id,
+		IN int32_t gid) = 507;
+
+ListMax(OUT int32_t *uid,
+	OUT int32_t *gid) = 510;
+
+SetMax(IN int32_t uid,
+       IN uint32_t gflag) = 511;
+
+ListElements(IN int32_t id,
+	     OUT prlist *elist,
+	     OUT uint32_t *over) = 514;
+
+GetCPS(IN int32_t id,
+       OUT prlist *elist,
+       OUT uint32_t *over) = 508;
+
+ListOwned(IN int32_t id,
+	  OUT prlist *elist,
+	  INOUT uint32_t *over) = 517;
+
+IsAMemberOf(IN int32_t uid,
+	    IN int32_t gid,
+	    OUT uint32_t *flag) = 515;
+
+GetCPS2(IN int32_t id,
+	IN uint32_t host,
+	OUT prlist *elist,
+	OUT uint32_t *over) = 518;
+
+GetHostCPS(IN uint32_t host,
+	   OUT prlist *elist,
+	   OUT uint32_t *over) = 519;
+
+const PRWANTUSERS = 1;
+const PRWANTGROUPS = 2;
+
+ListEntries(IN uint32_t flags,
+	    IN uint32_t unknown,
+	    OUT prcheckentry<PR_MAXLIST> *entries) = PRLISTENTRIES;
+
+ListGroupsMemberOf(IN int32_t id,
+		   OUT prlist *glist,
+		   OUT uint32_t *unknown) = 530;
+
+
+/* the end */

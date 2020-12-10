@@ -1,0 +1,19 @@
+/* -*-c-*- */
+
+
+package RXKAD_
+
+/* Error codes */
+const RXKADINCONSISTENCY	= 19270400;	/* security module structure inconsistent */
+const RXKADPACKETSHORT		= 19270401;	/* packet too short for security challenge */
+const RXKADLEVELFAIL		= 19270402;	/* security level negotiation failed */
+const RXKADTICKETLEN		= 19270403;	/* ticket length too short or too long */
+const RXKADOUTOFSEQUENCE	= 19270404;	/* packet had bad sequence number */
+const RXKADNOAUTH		= 19270405;	/* caller not authorised */
+const RXKADBADKEY		= 19270406;	/* illegal key: bad parity or weak */
+const RXKADBADTICKET		= 19270407;	/* security object was passed a bad ticket */
+const RXKADUNKNOWNKEY		= 19270408;	/* ticket contained unknown key version number */
+const RXKADEXPIRED		= 19270409;	/* authentication expired */
+const RXKADSEALEDINCON		= 19270410;	/* sealed data inconsistent */
+const RXKADDATALEN		= 19270411;	/* user data too long */
+const RXKADILLEGALLEVEL		= 19270412;	/* caller not authorised to use encrypted conns */

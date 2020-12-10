@@ -1,0 +1,8 @@
+*~
+.rxgen.check
+afs_py.c
+afs_py.h
+afs_xg.c
+afs_xg.h
+*.so
+__pycache__

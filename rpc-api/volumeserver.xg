@@ -1,0 +1,387 @@
+/* -*- c -*-
+ *
+ * Interface to Volume Server.
+ *
+ * reference /afs/nada.kth.se/misc/reference/programming/afs/shadow/
+ *
+ *
+ * Copyright (c) 1997 - 2004 Kungliga Tekniska Högskolan
+ * (Royal Institute of Technology, Stockholm, Sweden).
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the Institute nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+package VOLSER_
+
+const VLDB_MAXSERVER		= 80;
+const VOLSERVICE_PORT		= 7005;
+const VOLSERVICE_ID		= 4;
+const INVALID_BID		= 0;
+const VOLSER_MAXVOLNAME		= 65;
+const VOLSER_OLDMAXVOLNAME	= 32;
+const VOLSER_MAX_REPSITES	= 7;
+const VNAMESIZE			= 32;
+
+/* Opcodes */
+const VOLCREATEVOLUME	= 100;
+const VOLDELETEVOLUME	= 101;
+const VOLRESTORE	= 102;
+const VOLFORWARD	= 103;
+const VOLENDTRANS	= 104;
+const VOLCLONE		= 105;
+const VOLSETFLAGS	= 106;
+const VOLGETFLAGS	= 107;
+const VOLTRANSCREATE	= 108;
+const VOLDUMP		= 109;
+const VOLGETNTHVOLUME	= 110;
+const VOLSETFORWARDING	= 111;
+const VOLGETNAME	= 112;
+const VOLGETSTATUS	= 113;
+const VOLSIGNALRESTORE	= 114;
+const VOLLISTPARTITIONS	= 115;
+const VOLLISTVOLUMES	= 116;
+const VOLSETIDTYPES	= 117;
+const VOLMONITOR	= 118;
+const VOLPARTITIONINFO	= 119;
+const VOLRECLONE	= 120;
+const VOLLISTONEVOLUME	= 121;
+const VOLNUKEVOLUME	= 122;
+const VOLSETDATE	= 123;
+const VOLXLISTVOLUMES	= 124;
+const VOLXLISTONEVOL	= 125;
+const VOLSETINFO	= 126;
+const VOLXLISTPARTITIONS= 127;
+const VOLFORWARDMULTIPLE= 128;
+
+const PARTVALID	= 0x01;
+const VOK	= 0x02;
+const VBUSY	= 110;
+
+/* Error codes */
+const VOLSERTRELE_ERROR       = 1492325120;
+const VOLSERNO_OP             = 1492325121;
+const VOLSERREAD_DUMPERROR    = 1492325122;
+const VOLSERDUMPERROR         = 1492325123;
+const VOLSERATTACH_ERROR      = 1492325124;
+const VOLSERILLEGAL_PARTITION = 1492325125;
+const VOLSERDETACH_ERROR      = 1492325126;
+const VOLSERBAD_ACCESS        = 1492325127;
+const VOLSERVLDB_ERROR        = 1492325128;
+const VOLSERBADNAME           = 1492325129;
+const VOLSERVOLMOVED          = 1492325130;
+const VOLSERBADOP             = 1492325131;
+const VOLSERBADRELEASE        = 1492325132;
+const VOLSERVOLBUSY           = 1492325133;
+const VOLSERNO_MEMORY         = 1492325134;
+const VOLSERNOVOL	      = 1492325135;
+const VOLSERMULTIRWVOL        = 1492325136;
+const VOLSERFAILEDOP          = 1492325137;
+
+/* Attach mode for this volume at the start of the transaction */
+const ITOffline = 0x1;	/* volume offline on server (returns VOFFLINE) */
+const ITBusy = 0x2;	/* volume busy on server (returns VBUSY) */
+const ITReadOnly = 0x8; /* do not use */
+const ITCreate = 0x10;	/* volume does not exist correctly yet */
+const ITCreateVolID = 0x1000; /* create volid */
+
+/* Representing transaction state */
+const TTDeleted = 0x1;	/* delete transaction not yet freed due to refCount */
+
+const VTDeleteOnSalvage = 1;
+const VTOutOfService = 2;
+const VTDeleted = 4;
+
+struct volDescription {
+	char volName[VOLSER_MAXVOLNAME];
+	uint32_t volId;
+	uint32_t volSize;
+	uint32_t volFlags;
+	uint32_t volCloneId;
+};
+
+struct partList {
+	int32_t partId[26];
+	uint32_t partFlags[26];
+};
+
+struct volser_status {
+	uint32_t volID;
+	uint32_t nextUnique;
+	uint32_t type;
+	uint32_t parentID;
+	uint32_t cloneID;
+	uint32_t backupID;
+	uint32_t restoredFromID;
+	uint32_t maxQuota;
+	uint32_t minQuota;
+	uint32_t owner;
+	uint32_t creationDate;
+	uint32_t accessDate;
+	uint32_t updateDate;
+	uint32_t exprirationDate;
+	uint32_t backupDate;
+	uint32_t copyDate;
+};
+
+struct destServer {
+	uint32_t destHost;
+	uint32_t destPort;
+	uint32_t destSSID;   /* currently allways set to 1 */
+};
+
+struct volintInfo {
+	char name[VNAMESIZE];
+	uint32_t volid;
+	uint32_t type;
+	uint32_t backupID;
+	uint32_t parentID;
+	uint32_t cloneID;
+	uint32_t status;
+	uint32_t copyDate;
+	uint8_t inUse;
+	uint8_t needsSalvaged;
+	uint8_t destroyMe;
+	uint32_t creationDate;
+	uint32_t accessDate;
+	uint32_t updateDate;
+	uint32_t backupDate;
+	uint32_t dayUse;
+	uint32_t filecount;
+	uint32_t maxquota;
+	uint32_t size;
+	uint32_t flags;
+	uint32_t spare0;
+	uint32_t spare1;
+	uint32_t spare2;
+	uint32_t spare3;
+};
+
+struct xvolintInfo {
+	char name[VNAMESIZE];
+	uint32_t volid;
+	uint32_t type;
+	uint32_t backupID;
+	uint32_t parentID;
+	uint32_t cloneID;
+	uint32_t status;
+	uint32_t copyDate;
+	uint8_t inUse;
+	uint32_t creationDate;
+	uint32_t accessDate;
+	uint32_t updateDate;
+	uint32_t backupDate;
+	uint32_t dayUse;
+	uint32_t filecount;
+	uint32_t maxquota;
+	uint32_t size;
+	int32_t stat_reads[4];
+	int32_t stat_writes[4];
+	int32_t stat_fileSameAuthor[6];
+	int32_t stat_fileDiffAuthor[6];
+	int32_t stat_dirSameAuthor[6];
+	int32_t stat_dirDiffAuthor[6];
+};
+
+/*
+ * same site total, same site authenticated
+ * diff site total, diff site authenticated
+ */
+
+/*
+ * 0-60 s
+ * 1-10 min
+ * 10-60 min
+ * 1-24 hour
+ * 1-7 days
+ * >7 days
+ */
+
+struct transDebugInfo {
+	uint32_t tid;
+	uint32_t time;
+	uint32_t creationTime;
+	uint32_t returnCode;
+	uint32_t volid;
+	uint32_t partition;
+	uint16_t iflags;
+	uint8_t vflags;
+	uint8_t tflags;
+	char lastProcName[30];
+	uint32_t callValid;
+	uint32_t readNext;
+	uint32_t transmitNext;
+	uint32_t lastSendTime;
+	uint32_t lastReceiveTime;
+};
+
+struct pIDs {
+	uint32_t partIds[26];		/* -1 if none */
+};
+
+struct diskPartition {
+	char name[32];
+	char devName[32];
+	uint32_t lock_fd;
+	uint32_t totalUsable;
+	uint32_t free;
+	uint32_t minFree;
+};
+
+struct restoreCookie {
+	char name[32];
+	uint32_t type;
+	uint32_t clone;
+	uint32_t parent;
+};
+
+typedef transDebugInfo transDebugEntries<>;
+typedef volintInfo volEntries<>;
+typedef xvolintInfo xvolEntries<>;
+typedef int32_t part_entries<>;
+typedef int32_t multi_results<>;
+
+struct replica {
+	int32_t trans_id;
+	struct destServer destserver;
+};
+
+const AFS_MAX_DESTINATIONS = 255;
+
+typedef replica manyDests<AFS_MAX_DESTINATIONS>;
+
+CreateVolume(IN uint32_t partition,
+	     IN string name<>,
+	     IN uint32_t type,
+	     IN uint32_t parent,
+	     INOUT uint32_t *volid,
+	     OUT uint32_t *trans) = VOLCREATEVOLUME;
+
+DeleteVolume(IN uint32_t trans) = VOLDELETEVOLUME;
+
+NukeVolume(IN uint32_t partID,
+	   IN uint32_t volID) = VOLNUKEVOLUME;
+
+Dump(IN uint32_t fromTrans,
+     IN uint32_t fromDate) split = VOLDUMP;
+
+SignalRestore(IN string name<>,
+	      IN int32_t type,
+	      IN uint32_t pid,
+	      IN uint32_t cloneid) = VOLSIGNALRESTORE;
+
+Restore(IN uint32_t toTrans,
+	IN uint32_t flags,
+	IN restoreCookie *cookie) split = VOLRESTORE;
+
+Forward(IN int32_t fromTrans,
+	IN int32_t fromData,
+	IN destServer *destination,
+	IN uint32_t destTrans,
+	IN restoreCookie *cookie) = VOLFORWARD;
+
+Clone(IN uint32_t trans,
+      IN uint32_t purgeVol,
+      IN uint32_t newType,
+      IN string newName<>,
+      INOUT uint32_t *newVol) = VOLCLONE;
+
+ReClone(IN uint32_t tid,
+	IN uint32_t cloneID) = VOLRECLONE;
+
+SetForwarding(IN uint32_t tid,
+	      IN uint32_t newsite) = VOLSETFORWARDING;
+
+TransCreate(IN uint32_t volume,
+	    IN uint32_t partition,
+	    IN uint32_t flags,
+	    OUT uint32_t *trans) = VOLTRANSCREATE;
+
+EndTrans(IN uint32_t trans,
+	 OUT uint32_t *rcode) = VOLENDTRANS;
+
+GetFlags(IN uint32_t trans,
+	 OUT uint32_t *flags) = VOLGETFLAGS;
+
+SetFlags(IN uint32_t trans,
+	 IN uint32_t flags) = VOLSETFLAGS;
+
+GetName(IN uint32_t tid,
+	OUT string tname<256>) = VOLGETNAME;
+
+GetStatus(IN uint32_t tid,
+	  OUT volser_status *status) = VOLGETSTATUS;
+
+SetIdsTypes(IN uint32_t tId,
+	    IN string name<>,
+	    IN uint32_t type,
+	    IN uint32_t pId,
+	    IN uint32_t cloneId,
+	    IN uint32_t backupId) = VOLSETIDTYPES;
+
+SetDate(IN uint32_t tid,
+	IN uint32_t newDate) = VOLSETDATE;
+
+ListPartitions(OUT pIDs *partIDs) = VOLLISTPARTITIONS;
+
+PartitionInfo(IN string name<>,
+	      OUT diskPartition *partition) = VOLPARTITIONINFO;
+
+ListVolumes(IN uint32_t partID,
+	    IN uint32_t flags,
+	    OUT volEntries *resultEntries) = VOLLISTVOLUMES;
+
+ListOneVolume(IN uint32_t partID,
+	      IN uint32_t volid,
+	      OUT volEntries *resultEntries) = VOLLISTONEVOLUME;
+
+GetNthVolume(IN uint32_t index,
+	     OUT uint32_t *volume,
+	     OUT uint32_t *partition) = VOLGETNTHVOLUME;
+
+Monitor(OUT transDebugEntries *result) = VOLMONITOR;
+
+XListVolumes(IN uint32_t partID,
+	     IN uint32_t flags,
+	     OUT xvolEntries *resultEntries) = VOLXLISTVOLUMES;
+
+XListOneVolume(IN uint32_t partID,
+	       IN uint32_t volid,
+	       OUT xvolEntries *resultEntries) = VOLXLISTONEVOL;
+
+SetInfo(IN uint32_t transid,
+	IN volintInfo *volinfo) = VOLSETINFO;
+
+XListPartitions(OUT part_entries *ent) = VOLXLISTPARTITIONS;
+
+ForwardMultiple(IN int32_t fromTrans,
+		IN int32_t fromData,
+		IN manyDests *destinations,
+		IN uint32_t spare0,
+		IN restoreCookie *cookie,
+		OUT multi_results *results) = VOLFORWARDMULTIPLE;

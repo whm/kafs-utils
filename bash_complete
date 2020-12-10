@@ -1,0 +1,24 @@
+# -*- sh -*-
+# bash completion script for AFS tools
+#
+# To use these routines:
+#
+#    1. Copy this file to somewhere (e.g. ~/.stgit-completion.bash).
+#
+#    2. Add the following line to your .bashrc:
+#         . ~/.stgit-completion.bash
+
+_afs () {
+    COMPREPLY=($(./suite/bash-comp-helper.py $COMP_CWORD "${COMP_WORDS[@]}"))
+
+    case "${COMPREPLY[0]}" in
+	@HOSTNAME@)
+	COMPREPLY=($(compgen -A hostname -- "${COMP_WORDS[$COMP_CWORD]}"))
+	;;
+	@VOLNAME@|@PARTID@|@FILE@|@OTHER@)
+	COMPREPLY=($(compgen -A file -- "${COMP_WORDS[$COMP_CWORD]}"))
+	;;
+    esac
+}
+
+complete -o bashdefault -o default -F _afs afs bos pts vos
