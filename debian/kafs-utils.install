@@ -1,0 +1,3 @@
+suite/commands/bos  usr/bin
+suite/commands/pts  usr/bin
+suite/commands/vos  usr/bin

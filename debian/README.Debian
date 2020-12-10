@@ -1,0 +1,6 @@
+kafs-utils for Debian
+
+This is a Debian packaging of David Howell's kafs utilities for the
+AFS file system.
+
+ -- Bill MacAllister <bill@ca-zephyr.org>, Thu, 10 Dec 2020 07:27:01 +0000

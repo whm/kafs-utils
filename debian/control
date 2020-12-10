@@ -1,0 +1,23 @@
+Source: kafs-utils
+Section: net
+Priority: optional
+Build-Depends:
+ debhelper-compat (= 13),
+ dh_python3,
+ python3-all,
+ python3-setuptools,
+Rules-Requires-Root: no
+Maintainer: Bill MacAllister <bill@ca-zephyr.org>
+Standards-Version: 4.5.0
+Homepage: https://www.infradead.org/~dhowells/kafs/
+Vcs-Git: https://github.com/whm/kafs-utils
+Vcs-Browser: https://github.com/whm/kafs-utils
+
+Package: kafs-utils
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+Description: basic tools for kAFS and mounter for the AFS dynamic root
+ The kafs-utils suite is a replacement for bos, vos, pts and co. written
+ utilising AF_RXRPC to provide the transport.
