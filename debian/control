@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Build-Depends:
  debhelper-compat (= 13),
- dh_python3,
+ dh-python,
  python3-all,
  python3-setuptools,
 Rules-Requires-Root: no
